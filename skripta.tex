@@ -1,0 +1,270 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper}
+\usepackage[slovene]{babel}
+
+\title{Operacijski sistemi 2012/2013}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\section{UVOD}
+
+Kaj je OS?\\*
+
+Računalnik sestavljajo: 
+\begin{enumerate}
+
+\item
+UPORABNIKI(users)\\*
+želijo rešiti računske probleme\\*
+ljudje, drugi računalniki, krmiljeni stroji
+
+\item
+UPORABNIŠKI PROGRAMI(application programs)\\*
+opisujejo kako rešiti računski problem\\*
+urejevalniki, prevajalniki, sistemi za upravljanje z podatkovnimi bazami
+
+\item
+STROJNA OPREMA(hardware, resources)\\*
+zagotavlja vse računske vire\\*
+procesor, pomnilnikm, V/I naprave, ...
+\end{enumerate}
+
+Računalniški sistem: 
+
+//TODO slikca\\*
+
+\textcircled{?} Kdo bo to dogajanje usklajeval?\\*
+ODG: Operacijski sistem - OS\\*
+//TODO slikca\\*
+
+Sistemski programi
+\begin{itemize}
+  \item zbirnik(assembler)
+  \item nalagalnik(loader)
+  \item povezovalnik(linker), knjižnjice(library)
+\end{itemize}
+
+Naloge v OS(v grobem)
+\begin{itemize}
+  \item dodeljuje računalniške vire programom (pri tem upošteva potrebe in zmožnosti računalniškega sistema)
+  \item rešuje konfliktne situacije, kadar prihaja do tekme za vire (pojavi se potreba po optimizaciji)
+  \item optimizacija izkoriščenosti strojne opreme
+  \item nadzira delo nekaterih računalniških virov
+  \item olajšuje delo uporabnikov
+\end{itemize}
+
+OS je program, ki deluje kot posrednik med uporabnikom in strojno opremo. Pri tem poskuša:
+\begin{enumerate}
+  \item zagotoviti unčikovito rabo računalniških virov
+  \item ustvariti prijazno okolje za uporabnika
+\end{enumerate}
+
+\section{ZGODOVINA}
+
+ZGODNJI RAČUNALNIŠKI SISTEMI
+\begin{itemize}
+  \item računalniki fizično veliki
+  \item uporabljali so se s konzolo
+  \item operater = programer
+  \item postopek:	
+    \begin{itemize}
+      \item program
+      \item ročno naloži v pomnilnik
+      \item napiše začetni naslov v PC
+      \item sproži izvajanje in opazuje
+      \item odčita in izpiše registre(rezultat)
+      \item debugiranje
+    \end{itemize}
+  				
+\end{itemize}
+
+Povzetek: mučno, dolgotrajno\\*
+
+Kmalu kasneje sledijo izboljšave
+\begin{itemize}
+  \item strojna oprema (čitalci luknjanih kartic, tiskalniki)
+  \item programska oprema (zbirnik, nalagalnik, matematične knjižnjice, povezovalnik, gonilnik(skrbi za strojno opremo), prevajalniki, urejevalniki)
+\end{itemize}
+
+Povzetek: izboljšave so poenostavile programiranje, toda niso izboljšale uporabe računalnika. Zakaj?\\*
+
+\textbf{Posel(job) = vsi postopki, ki so potrebni, da se izvrši neko opravilo v računalniku}\\*
+
+Primer: posel lahko zahteva veliko demontaže, montaže, eksplicitnega nalaganja, zaganjanja naših progrmaov => porabi se veliko časa\\*
+
+//TODO slikca\\*
+
+setup time(čas priprave)
+\begin{math}
+  T_1 - T_2
+\end{math}
+je zelo velik.\\*
+Med tem je bil procesor(računalnik) neizkoriščen, toda računalnik je bil drag.\\*
+
+\textcircled{?} Kako povečati izkoriščenost računalnika?\\*
+
+Dve izboljšavi:\\*
+
+\textcircled{1} profesionalizacija operaterja
+//TODO slikca\\*
+\textcircled{+} izkoriščenost je boljša\\*
+\textcircled{-} neiteraktivnost: v primeru napake operater posreduje programerju izpise registrov in pomnilnilških lokacij(dump)\\*
+
+\textcircled{2} Uvedba paketne obdelave\\*
+//TODO slikca\\*
+\textcircled{+} ker se posli s podobnimi zahtevami obdelujejo eden za drugim, se skrajša čas priprave => nekateri postopki so zato odpadli(optimizacija)\\*
+
+Toda: kljub \textcircled{1} in \textcircled{2} izkoriščenost računalniškega sistema še vedno premajhna!\\*
+Razlogi: operater
+\begin{itemize}
+  \item opazuje izvajanje programa
+  \item ugotiviti mora, kaj se je zgodilo
+  \item zagotoviti izpis pomnilnika(dump)
+  \item naloži in sporoči naslednji posel iz paketa
+  \item sproži izvajanje
+\end{itemize}
+
+Ugotovitev: med enim in drugim poslom še vedno mine preveč časa, spet je zavora človek(operater).\\*
+
+Sklep: operaterja je treba zamenjati z strojem, s računalnikom samim. Računalnik sam naj skrbi  za neprekinjeno, avtomatično izvajanje nizanje poslov.\\*
+
+Kako? Uvedba \textbf{rezidentnega monitorja}.
+
+\section{Rezidentni monitor}
+
+Za avtomatično izvajanje poslov so razvili program imenovan rezidentni monitor.\\*
+Naloga: ob koncu posla mora rezidentni monitor avtomatično izvesti naslednji posel v paketu.\\*
+
+Kako? V načelu:
+\begin{enumerate}
+  \item Ob zagonu računalnika se mora rezidentni monitor naložiti v glavni pomnilnik in poskrbeti za izvedbo prvega posla v paketu.\\* Sam rezidentni monitor med tem ostane v glavnem pomnilniku(rezidenten).
+
+  \item Ko se posel konča, residentni monitor takoj prevzame nadzor\\*
+in poskrbi za izvedbo naslednjega posla v paketu.
+\end{enumerate}
+//TODO slikca\\*
+
+Kako naj rezidenti monitor izvede posel?
+
+//TODO slikca\\*
+
+Uvedejo se kontrolne kartice z navodili(ukazi) rezidentnemu monitorju.\\*
+Posledica: en del rezidentnega monitorja mora skrbeti  za razpoznavanje in interpretacijo kontrolnih kartic\\*
+
+Prednosti:
+\begin{itemize}
+  \item boljša izkoriščenost procesorja
+\end{itemize}
+
+Slabosti:
+\begin{itemize}
+  \item ni interakcije med programerjem in računalnikom
+  \item čas od oddaje programa do rezultata (turn around) je bil relativno velik
+\end{itemize}
+
+Razloga:
+\begin{itemize}
+  \item računska zahtevnost problema(ok, ne moremo izboljšati)
+  \item od tega kdaj posel pride na vrsto za obdelavo(moti programerje, lastnikov pa ne)
+\end{itemize}
+
+Toda: procesor bi lahko bil še bolj izkoriščen(ugotovitev)\\*
+
+Razlog: počasnost V/I naprav, npr: 
+\begin{itemize}
+  \item procesor sposoben narediti nekaj
+    \begin{math}
+    10^6
+    \end{math}
+    ukazov / sekundo
+
+  \item čitalec kartic 10 kartic/sekundo
+
+  \item V/I naprava 10 000 počasnejša od procorja
+
+  \item pozneje so izboljšali čitalce, vendar so procesorji napredovali še hitreje, razkorak še večji
+\end{itemize}
+
+Kaj sedaj? Dve izboljšavi:
+\begin{itemize}
+  \item ločeni V/I(offline processing)
+  \item spooling
+\end{itemize}
+
+LOČEN V/I\\*
+//TODO slikca\\*
+
+Ob pojavu magnetnega traku\\*
+//TODO slikca\\*
+
+Prednost: boljša izkoriščenost procesorja(zaradi prekrivanja aktivnosti, overlapping)\\*
+Slabost: turnarround še vedno velik, ni interakcije\\*
+
+SPOOLING(simultaneous peripheral operations on-line)\\*
+Pojavili so se magnetni diski(medij z direktnim dostopom => glava se relativno hitro premakne nad druge podatke)\\*
+Ideja: Uporabiti magnetni disk kot velik vmesnik za začasno hranjenje V/I podatkov.\\*
+//TODO slikca\\*
+
+\textcircled{+} Prekrivanje V/I aktivnosti in računskih aktivnosti\\*
+\textcircled{-} Se vedno ni interakcije\\*
+
+Paketna obdelava + Multiprogramiranje\\*
+Spooling omogoči, da je na magnetnem disku hkrati več pripravljenih poslov.\\*
+Disk nudi direkten dostop do vsakega od njih.\\*
+Posledica: možno je naseldnjega, ki se bo naložil v glavni pomnilni izbrati\\*
+VPRAŠANJE: Kateri posel naj se naslednji naloži v glavni pomnilnik?\\*
+ODGOVOR: Nova naloga za OS: Razvrščanje poslov(job scheduler)\\*
+VPRAŠANJE: Kako izkoristiti možnost, da se v glavnem pomnilniku naloži več pripravljenih poslov?\\*
+ODGOVOR: Multiprogramiranje - tehnika izvajanja več poslov(nova naloga za OS)\\*
+
+//TODO slikca\\*
+
+Multiprogramiranje
+\begin{enumerate}
+  \item v glavnem pomnilniku je OS in nekaj pripravljenih programov
+  \item OS izbere enega med njimi in ga zažene
+  \item če se tekoči program ustavi(bodisi, ker je končal ali pa nekaj čaka) prevzame nadzor OS in izbere drug pripravljen posel in ga požene
+\end{enumerate}
+
+//TODO slikca\\*
+
+Nove naloge za OS?\\*
+\textcircled{?} Kateri posli na se naložijo v glavni pomnilnik?\\*
+RAZVRŠČANJE POSLOV\\*
+\textcircled{?} Kje in koliko pomnilnika dodeliti izbranemu poslu?\\*
+UPRAVLJANJE S POMNILNIKOM\\*
+\textcircled{?} Kateremu od pripravljenih programov v glavnem pomniliku naslednjemu dodeliti procesor(multi programiranje)?\\*
+RAZVRŠČANJE NA PROCESORJU\\*
+\textcircled{?} Kako zaščititi posle v glavnem pomnilniku enega pred drugim?\\*
+ZAŠČITA\\*
+\textcircled{+} boljša izkoriščenost procesorja\\*
+\textcircled{-} ni interakcije => manjša storilnost programerjev\\*
+
+Interaktivnost (za uporabnika/programerja)\\*
+Programerjeve želje:
+\begin{enumerate}
+  \item ukazovati OS preko tipkovnice in prejemati odzive/rezultate na zaslon
+  \item OS naj "takoj" izvrši uporabnikov ukaz, uporabnika takoj obvesti o rezultatu in naj čaka na njegov ukaz
+  \item v pomoč naj bo interaktivna programska oprema: urejevalniki, debugerji, ...\\*
+
+//TODO slikca\\*
+Posledice za razvijalce/lastnika
+  \item uvesti bo treba t.i. datotečni sistem, ki
+  	\item hrani programe/podatke v datotekah,
+  	\item ki bodo shranjene na hitrih zunanjih pomnilnikih
+	\item in bodo organizirane v mape itd.(zaradi hitrega dostopa, ...)
+  \item cena
+  \item pogosto bodo V/I operacije s človekom
+  \item človek je počasen
+\end{enumerate}
+
+\textcircled{?} Posledice želje po iteraktivnosti je višja cena računalnika, hkrati pa grozi tudi slaba izkoriščenost računalnika(zaradi človekove počasnosti)
+
+
+\end{document}
