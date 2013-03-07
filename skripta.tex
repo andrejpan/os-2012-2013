@@ -1,100 +1,113 @@
-\documentclass{article}
+\documentclass[
+  slovene,
+  a4paper
+]{book}
 
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{geometry}
-\geometry{a4paper}
-\usepackage[slovene]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
 
-\title{Operacijski sistemi 2012/2013}
-\author{}
-\date{}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+
+\newtheorem*{df}{Definicija}
+
 
 \begin{document}
+
+\title{Operacijski sistemi 2012/2013}
+\author{prof. dr. Borut Robič }
+\date{šolsko leto 2012/2013}
+
 \maketitle
-\section{UVOD}
 
-Kaj je OS?\\*
+\chapter{Uvod}
 
-Računalnik sestavljajo: 
-\begin{enumerate}
+V tem poglavju si bomo na kratko ogledali, kaj je sploh operacijski sistem (OS), zgodovinski potek razvoja OS in na zadnje še nekatere vrste operacijskih sistemov.
 
-\item
-UPORABNIKI(users)\\*
-želijo rešiti računske probleme\\*
-ljudje, drugi računalniki, krmiljeni stroji
 
-\item
-UPORABNIŠKI PROGRAMI(application programs)\\*
-opisujejo kako rešiti računski problem\\*
-urejevalniki, prevajalniki, sistemi za upravljanje z podatkovnimi bazami
+\section{Kaj je operacijski sistem?}
 
-\item
-STROJNA OPREMA(hardware, resources)\\*
-zagotavlja vse računske vire\\*
-procesor, pomnilnikm, V/I naprave, ...
-\end{enumerate}
+V grobem bi lahko računalniški sistem razdelili na tri glavne komponente:
 
-Računalniški sistem: 
+\begin{description}
+  \item[uporabnike (users)] Ti želijo rešiti računske probleme, tipični predstavniki te skupine pa bi bili ljudje, drugi računalniki in krmiljeni stroji.
+  \item[uporabniške programe (application programs)] Ti opisujejo, kako rešiti računski problem (urejevalniki, prevajalniki, sistemi za upravljanje z podatkovnimi bazami).
+  \item[strojno opremo (hardware, resources)] Ta zagotavlja vse računske vire, ki opravijo dejansko delo (procesor, pomnilnikm, V/I naprave ...).
+\end{description}
 
-//TODO slikca\\*
+\begin{figure}[h!]
+  \centering
+  \input{001-racunalniski-sistem.pdf_tex}
+  \caption{Uporabniki (U) uporabljajo razne uporabniške programe (P), s katerimi izkoriščajo razne računske vire (V)}
+  \label{001-racunalsniski-sistem}
+\end{figure}
 
-\textcircled{?} Kdo bo to dogajanje usklajeval?\\*
-ODG: Operacijski sistem - OS\\*
-//TODO slikca\\*
-
-Sistemski programi
+Usklajevanje teh komponent pa je naloga operacijskega sistema, ki stoji med strojno opremo in sistemskimi ter uporabniškimi programi (slika~\ref{002-usklajevanje}). Pod pojmom sistemski programi pa ponavadi štejemo:
 \begin{itemize}
-  \item zbirnik(assembler)
-  \item nalagalnik(loader)
-  \item povezovalnik(linker), knjižnjice(library)
+  \item zbirnik (assembler)
+  \item nalagalnik (loader)
+  \item povezovalnik (linker), knjižnjice (libraries)
 \end{itemize}
 
-Naloge v OS(v grobem)
+\begin{figure}
+  \centering
+  \input{002-usklajevanje.pdf_tex}
+  \caption{Hierarhična predstavitev umestitve operacijskega sistema v računalniški sistem.}
+  \label{002-usklajevanje}
+\end{figure}
+
+
+\subsection{Naloge v OS}
+
+V grobem bi lahko naloge OS razdelili v naslednje kategorije:
 \begin{itemize}
-  \item dodeljuje računalniške vire programom (pri tem upošteva potrebe in zmožnosti računalniškega sistema)
+  \item dodeljuje računalniške vire programom (z upoštevanjem potreb in zmožnosti računalniškega sistema)
   \item rešuje konfliktne situacije, kadar prihaja do tekme za vire (pojavi se potreba po optimizaciji)
   \item optimizacija izkoriščenosti strojne opreme
   \item nadzira delo nekaterih računalniških virov
   \item olajšuje delo uporabnikov
 \end{itemize}
 
-OS je program, ki deluje kot posrednik med uporabnikom in strojno opremo. Pri tem poskuša:
+OS bi torej lahko opisali kot \emph{program, ki deluje kot posrednik med uporabnikom in strojno opremo.} Pri tem poskuša:
 \begin{enumerate}
   \item zagotoviti unčikovito rabo računalniških virov
   \item ustvariti prijazno okolje za uporabnika
 \end{enumerate}
 
-\section{ZGODOVINA}
 
-ZGODNJI RAČUNALNIŠKI SISTEMI
+\section{Zgodovina}
+
+V tem odseku si bomo na kratko ogledali zgodovinski razvoj računalniških oz. operacijskih sistemov in osnovne ideje, ki so se pojavile med razvojem in jih uporabljamo še danes.
+
+
+\subsection{Zgodnji računalniški sistemi}
+
+Ti računalniki so bili fizično veliki in so se uporabljali s pomočjo konzole. Operater takšnega računalnika je bil obenem programer. Postopek izvedbe programa lahko opišemo z naslednjmi koraki:
+\begin{enumerate}
+  \item napiši program
+  \item ročno ga naloži v pomnilnik
+  \item napiši začetni naslov v PC
+  \item sproži izvajanje in opazuj
+  \item ob primernem času prekini izvajanje
+  \item odčitaj in izpiši registre (rezultat)
+  \item v kolikor pride med izvajanjem do težav, jih odpravi (razhroščevanje)
+\end{enumerate}
+
+Iz samega opisa je razvidno, da je takšno rokovanje z računalnikom zamudno in mučno. In ker je mukotrpnost nekega opravila najboljša stimulacija za izboljšanje postopka, so se kmalu pojavile prve izboljšave:
 \begin{itemize}
-  \item računalniki fizično veliki
-  \item uporabljali so se s konzolo
-  \item operater = programer
-  \item postopek:	
-    \begin{itemize}
-      \item program
-      \item ročno naloži v pomnilnik
-      \item napiše začetni naslov v PC
-      \item sproži izvajanje in opazuje
-      \item odčita in izpiše registre(rezultat)
-      \item debugiranje
-    \end{itemize}
-  				
+  \item nova strojna oprema (čitalci luknjanih kartic, tiskalniki)
+  \item programska oprema (zbirnik, nalagalnik, matematične knjižnjice, povezovalnik, gonilnik (skrbi za strojno opremo), prevajalniki, urejevalniki)
 \end{itemize}
 
-Povzetek: mučno, dolgotrajno\\*
+Te izboljšave so poenostavile programiranje, toda zapletle uporabo računalnika. Zakaj se je to zgodilo bomo razjasnili ob naslednji definiciji.
 
-Kmalu kasneje sledijo izboljšave
-\begin{itemize}
-  \item strojna oprema (čitalci luknjanih kartic, tiskalniki)
-  \item programska oprema (zbirnik, nalagalnik, matematične knjižnjice, povezovalnik, gonilnik(skrbi za strojno opremo), prevajalniki, urejevalniki)
-\end{itemize}
-
-Povzetek: izboljšave so poenostavile programiranje, toda niso izboljšale uporabe računalnika. Zakaj?\\*
-
-\textbf{Posel(job) = vsi postopki, ki so potrebni, da se izvrši neko opravilo v računalniku}\\*
+\begin{df}
+  Posel (job) so vsi postopki, ki so potrebni, da se izvrši neko opravilo v računalniku
+\end{df}
 
 Primer: posel lahko zahteva veliko demontaže, montaže, eksplicitnega nalaganja, zaganjanja naših progrmaov => porabi se veliko časa\\*
 
