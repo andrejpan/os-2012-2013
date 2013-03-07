@@ -277,7 +277,133 @@ Posledice za razvijalce/lastnika
   \item človek je počasen
 \end{enumerate}
 
-\textcircled{?} Posledice želje po iteraktivnosti je višja cena računalnika, hkrati pa grozi tudi slaba izkoriščenost računalnika(zaradi človekove počasnosti)
+\textcircled{?} Posledice želje po iteraktivnosti je višja cena računalnika, hkrati pa grozi tudi slaba izkoriščenost računalnika(zaradi človekove počasnosti)\\*
 
+\section{Rešitev: Multiprogramiranje + časovno dodeljevanje}
+
+\begin{enumerate}
+  \item Hkrati dela več uporabnikov vsak s svojim poslom, \underline{toda} vsak posel se sme neprekinjeno ivajati le omejen čas.
+  \item OS \underline{izbere} posel, mu dodeli čas za izvajanje(t.i. časovno rezino).
+  \item Če mine časovna rezina ali pa se posel ustavi(konča ali čaka) nadzor prevzame OS. ki nato izbere nek drug posel, mu dodeli časovno rezino in ga požene.
+\end{enumerate}
+
+! Ob \underline{ustrezni} dolžini časovne rezine in ob \underline{ustreznem} izbiranju poslov se procesor dovolj pogosto vrne k vsakemu poslu, tako, da lastnik posla ne opazi, da je proceor med tem opravljal še tuje posle.\\*
+
+Uporabnik ima občutek, da računalnik obdeluje le njegov posel.\\*
+
+Sedaj več uporabnikov \underline{interaktivno} uporablja računalnik, hkrati pa je računalnik dobro \underline{izkoriščen}.\\*
+
+Tak program se imenuje: OS z časovnim dodeljevanjem (time-sharing OS)\\*
+
+Termilogija:\\*
+posel(job) --> proces(process): program v neki fazi izvajanja\\*
+Vsak uporabnik ima vsaj en svoj proces.\\*
+Procesi za uporabnika upravljajo razne naloge, imenovane \underline{opravila}(tasks) oziroma več opravilni OS(multi tasking OS)\\*
+
+//TODO slikca\\*
+
+\section{Nove naloge za večopravilni OS}
+
+\begin{itemize}
+  \item ? Kako zagotoviti unčikovito rabo datotek? --> unčikovit datotečni sistem
+  \item ? Datoteke na zunanjih pomnilnikih. Kako doseči, da bodo unčikovito izkoriščene? --> upravljanje z zunanjimi pomnilniki
+  \item ? Ker je glavni pomnilnik končen lahko proces(program) dobi le del pomnilnika. --> Upravljanje z nevideznim pomnilnikom
+  \item ? Kako preprečiti uviranje medsebojnih procesov --> zaščita
+  \item ? Kateri proces naj naslednji dobi procesor? --> razvrščanje na procesorju, komunikacija med procesi in sinhronizacija
+\end{itemize}
+
+\chapter{Elementi računalniškega sistema}
+
+OS potrebuje nekatere dele strojne opreme
+
+\section{Vsebina}
+
+\begin{itemize}
+  \item delovanje računalniškega sistema
+  \item vhod in izhod
+  \item pomnilnik
+  \item strojna zaščita
+  \item sistemski klici
+\end{itemize}
+
+\section{Delovanje računalniškega sistema}
+
+Sodoben računalniški sistem
+
+//TODO slikca\\*
+
+\begin{df}
+ Krmilnik(controler) je naprava, ki nadzoruje drugo napravo ali več naprav. 
+\end{df}
+
+\underline{Zagon in delovanje računalniškega delovanja}\\*
+
+Ob vklopu se zažene poseben program, \underline{zagonski nalagalnik} (bootstrap loader)\\*
+
+Zagonski nalagalnik:
+\begin{itemize}
+  \item je relativno majhen, enostaven
+  \item naloge: preveri strojno opremo(pomnilnik, registre, ...)
+  \item inicializira strojno opremo: naloži OS(jedro) v glavni pomnilnik in nato preda nadzor OS
+\end{itemize}
+
+Sedaj se zažene OS.\\*
+
+Delovanje računalniškega sistema(OS) - OS je voden s prekinitvami(interupt driven OS)\\*
+
+To pomeni: OS čaka na \underline{dogodek} in se nanj \underline{odzove}\\*
+
+O dogodku OS obvesti t.i. prekinitvena zahteva(interupt request)
+
+\subsection{Vrste prekinitev}
+Prekinitev je
+\begin{itemize}
+  \item \underline{strojna}, če jo zahteva strojna oprema. Npr. naprava pošlje po vodilu prekinitveno zahtevo in z njo prekine tekoče opravilo(konec V/I operacije)
+  \item \underline{programska}, če jo sproži program, ki ravnokar teče. Npr. \underline{past}(trap, execption), ko CPE zazna neko izjemno situacijo(deljenje z 0). \underline{sistemski klici} t.i. ukazi s katerimi tekoči program zaprosi OS za pomoč.
+\end{itemize}
+
+//TODO slikca\\*
+
+\subsubsection{Potek prekinitve:}
+ko se pojavi zahteva za prekinitev(stoj!)
+
+\begin{itemize}
+  \item CPE prekine tekoče opravilo(proces)
+  \item izvede se prekinitveni servisni program(PSP)
+  \item nadaljuje prekinjeno opravilo
+\end{itemize} 
+
+//TODO slikca\\*
+
+\subsubsection{Izvede prekinitev}
+\begin{itemize}
+  \item programsko izpraševanje
+  \item vektorsko
+\end{itemize}
+
+\subsection{Programsko izpraševanje}
+\begin{itemize}
+  \item CPE prekine tekoče opravilo
+  \item začne izvajati \underline{skupni PSP}(handler), ki ugotovi, kje je vir zahteve za prekinitev
+  \item potem zažene ustrezni PSP(glede na vir zahteve)
+  \item \textcircled{+} enostavnost
+  \item \textcircled{-} počasnost
+\end{itemize}
+
+//TODO slikca\\*
+
+\subsection{Vektorsko}
+\begin{enumerate}
+  \item V glavnem pomnilniku je \underline{prekinitveni vektor}, ki vsebuje naslove: \begin{math} A_1, A_2,...,A_n od PSP_1, PSP_2,..., PSP_n\end{math}.
+  \item Naprave ve, da je naslov njenega PSP-ja v i-ti komponenti vektorja.
+  \item Ko naprava zahteva prekinitev pošlje v CPE tudi indeks i.\\*
+
+//TODO slikca\\*
+
+  \item Procesor prekine tekoče opracilo, shrani vsebino registrov na sklad.
+  \item CPE uporabi indeks i, da prebere \begin{math}A_i in ga vpiše v PC(začne se PSP_i).\end{math}
+  \item Prične se izvajati \begin{math}PSP_i\end{math}(ko se konča, se obnovi prejšnje stanje CPE s sklada)
+  \item CPE nadaljuje prejšnje opravilo
+\end{enumerate}
 
 \end{document}
