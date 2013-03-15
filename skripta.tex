@@ -408,4 +408,139 @@ ko se pojavi zahteva za prekinitev(stoj!)
   \item CPE nadaljuje prejšnje opravilo
 \end{enumerate}
 
+\subsection{Prekinjanje prekinitev (PSP)}
+
+\begin{enumerate}
+  \item Prekinjanje ni dovoljeno, prednost tega je enostavnost računalniškega sitema
+  \item Prekinjanje je dovoljeno: ugnezdene prekinitve
+\end{enumerate}
+
+//TODO slikca\\*
+
+Prekinitvene zahteve imajo svoje \underline{prioritete}. Če ima nova prekinitvena zahteva višjo prioriteto od tekočega PSP, bo ta prekinjen, sicer ne.\\*
+
+\begin{itemize}
+  \item \textcircled{+} večja prilagodljivost, odzivnost računalnika
+  \item \textcircled{-} večja zapletenost celotnega mehanizma odzivanja
+\end{itemize}
+
+\section{Vhod in izhod}
+
+\begin{df}
+  Vhodno/izhodni sistem = V/I naprave + pripadajoči krmilniki + programi za V/I operacije
+\end{df}
+
+V/I naprave:
+\begin{itemize}
+  \item \underline{za prenos} podatkov med računalnikom in zunanjim svetom(tipkovnica, zaslon, tiskalnik, senzor, komunikacija preko omrežja)
+  \item \underline{za shranjevanje} podatkov: disk, optična disk, magnetni trak
+\end{itemize}
+
+\subsection{Naloga krmilnikov}
+
+\begin{itemize}
+  \item skrbijo za podrobnosti pri prenosu(oz hranjenju) podatkov na/z \underline{V/I naprave} in svojim \underline{lokalnim pomnilnikom}\\*
+  
+//TODO slikca\\*
+
+  \item vsebuje regitre:
+    \begin{itemize}
+      \item \underline{statusni register} za stanje V/I naprave: busy, done, error, ...
+      \item \underline{ukazni register} za ukaz, ki ga naj izvede V/I naprava
+      \item \underline{podatkovni register} za prenos parametrov ukaza
+    \end{itemize}
+  \item vsebuje lokalnim pomnilnik(odvisno od naprave)
+\end{itemize}
+
+Programi za V/I operacije
+\begin{itemize}
+  \item se nahaja v pomnilniku
+  \item različno kompleksni(odvisno od V/I naprave)
+\end{itemize}
+
+\subsection{Potek V/I operacije}
+
+\begin{enumerate}
+  \item Procesor vpiše podatke v registe pomnilnika. Npr:
+    \begin{itemize}
+      \item Naslov sektorja, ki naj se bere; ukaz:beri
+      \item Naslov podatkov, ki naj se izpišejo, njihova dolžina, cilni naslov; ukaz: izpiši/zapiši
+    \end{itemize}
+  \item Krmilnik prične izvajati zahtevano operacijo(ukaz) Npr:
+    \begin{itemize}
+      \item če imamo branje: premakni glavo na pravo mesto, prepoznaj začetek zahtevanega sektorja, sestavi prebrane bite v bajte, prenesi bajt v glavni pomnilnik, preveri pravilnost prenosa
+    \end{itemize}
+  \item Ko je V/I operacija končana, krmilnik pošlje zahtevo po prekinitvi
+\end{enumerate}
+  
+//TODO slikca. Komentar: Potek V/I operacije(v grobem)\\*
+
+\begin{df}
+  V/I operacijo je naročil \underline{proces - naročnik}(program v izvajanju)
+\end{df}
+Ker med \textcircled{1} in \textcircled{3} mine \underline{veliko} časa, je vprašanje: Kaj med tem počne naročnik?\\*
+Odgovora sta dva, odvisno od pristopa: sinhroni ali asinhroni V/I
+
+\subsection{Sinhroni V/I}
+
+\begin{itemize}
+  \item naročnik čaka, da se V/I konča in pri tem \underline{zaseda procesor}
+  \item vrste čakanja:
+    \begin{itemize}
+      \item ukaz STOP, ki ustavi procesor, dokler ga nek signal ne zbudi
+      \item pri enostavnih računalnikih naročnik izvaja ukaz(busy wait): "L: jmp L"
+      \item v zanki lahko samo opazuje statusni register krmilnika
+    \end{itemize}
+  \item \textcircled{+} takoj se sproži ustrezni PSP
+  \item \textcircled{-} procesor je slabo izkoriščen, prav tako tudi V/I(če jih imamo več)
+\end{itemize}
+
+\subsection{Asinhroni V/I}
+
+\begin{itemize}
+  \item naročnik nadaljuje svoje izvajanje
+  \item Toda v nadaljevanju je možno marsikaj:
+    \begin{description}
+      \item[a)] naročnik res lahko nadaljuje \underline{brez težav}. Npr: naročnik je izdal ukaz za tiskanje
+      \item[b)] izkaže se(slej ali prej), da naročnik \underline{ne more} nadaljevati. Npr: naročnik potrebuje podatke iz diska. Tedaj naročnik sebe \underline{blokira}(sprosti procesor in se umakne na čakanje na konec V/I opracije) s pomočjo \underline{sistemskega klica}
+    \end{description}
+  \item \textcircled{+} naročnik med V/I operacijo bodisi \underline{koristno zaseda} procesor ali pa ga \underline{sprosti} => boljša izkoriščenost
+  \item \textcircled{+} sproščeni procesor lahko uporabi kak drug proces(program, ki bo stekel) ~ multiprogramiranje
+  \item \textcircled{+} hkrati lahko poteka več operacij
+\end{itemize}
+
+\subsection{Tabela stanj V/I naprav}
+
+Videli smo: asinhroni V/I omogoča več V/I opeacij hkrati.\\*
+
+Kako z njimi opravlja OS?\\*
+OS uporablja \underline{tabelo stanj naprav}(device-status table)\\*
+
+Vsaki V/I napravi pripada ena \underline{komponenta} tabele, ki vsebuje:
+\begin{itemize}
+  \item podatke o V/I napravi(ime naprave, tip, stanje, ...)
+  \item kazalec na seznam vseh zahtev, naslovljenih na to  napravo
+\end{itemize}
+
+//TODO slikca.\\*
+
+\subsubsection{Začetek V/I naprave(vloga OS)}
+
+Proces - naročnik želi začeti neko V/I operacijo. Zato izvede t.i. \underline{sistemski klic} za V/I. Nato se odzove OS in prevzame nadzor in:
+
+\begin{itemize}
+  \item ugotovi za katero V/I napravo gre in pogleda v tabelo stanj naprav v ustrezno komponento
+  \item če je naprava zasedena(torej seznam ni prazen) potem OS vključi noco zahtevo v seznam(npr. na konec), sicer OS kreira novo zahtevo v prazen seznam in poskrbi za začetek V/I operacije(npr. naroči gonilniku naj prevzame skrb za to V/I operacijo)
+  \item nadzor lahko vrne naročniku oziroma naročnika postavi v čakalno vrsto.
+\end{itemize}
+
+\subsubsection{Konec V/I operacije}
+
+Ko V/I naprava konča, krmilnik pošlje zahtevo za prekinitev. To bo obudilo OS, ki:
+\begin{enumerate}
+  \item ugotovi, za katero operacijo V/I gre in pogleda v njeno komponento v tabeli stanj
+  \item iz seznama izloči končano V/I zahtevo in o koncu V/I operacije obvesti naročnika, če nanj čaka
+  \item če seznam še ni prazen, potem OS izbere eno od čakajočih zahtev in poskrbi za njen začetek.
+\end{enumerate}
+
 \end{document}
