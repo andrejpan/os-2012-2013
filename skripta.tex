@@ -543,4 +543,160 @@ Ko V/I naprava konča, krmilnik pošlje zahtevo za prekinitev. To bo obudilo OS,
   \item če seznam še ni prazen, potem OS izbere eno od čakajočih zahtev in poskrbi za njen začetek.
 \end{enumerate}
 
+Ko V/I naprava(oziroma krmilnik) prebere podatke v svoj lokalni pomnilnik, o tem obvesti naročnika(proces), ki potem prenese podatke v svoj pomnilnik. Tu je potrebno angažirati CPE.\\*
+
+\textcircled{?} Ali je CPE s prenšanjem podatkov zelo obremenjen? Če je V/I naprava počasna, potem asihroni prenos bistveno ne obremenjuje.\\*
+
+//TODO slikca. Komentar: Počasne naprave \\*
+
+//TODO slikca. Komentar: Hitre naprave(npr. disk) \\*
+
+Če je V/I naprava \underline{hitra}, lahko pogosto prekinja CPE, da ta ne morem zadosti unčikovito opraviti drugih nalog. Asihroni V/I v takem primeru ni primeren.\\*
+
+\subsubsection{Ideja:} 
+Če je V/I relativno hitra, naj se prenos podatkov vrši neposredno med pomnilnikom in glavnim pomnilnikom(brez vednosti CPE).\\.
+
+//TODO slikca. Komentar: Takšno rešitev imenujemo DMA(direct memory access).\\*
+
+\subsection{Potek DMA}
+
+\begin{enumerate}
+  \item Naročnik(CPE) vpiše v registre krmilnika:
+    \begin{description}
+      \item[A] ... naslov vmesnega pomnilnika v glavnem pomnilniku
+      \item[B] ... naslov začetnega sektorja na disku
+      \item[C] ... velikost podatkov vmesnega pomnilnika
+      \item[U] ... ukaz(beri/piši)
+    \end{description}
+  \item Krmilnik začne izvajati V/I operacijo
+    \begin{itemize}
+      \item Branje podatkov iz diska
+        \begin{itemize}
+          \item prenese podatke iz diska v lokalni pomnilnik
+          \item preveri pravilnost prenosa
+          \item prenese vsebino lokalnega pomnilnika v glavni pomnilnik na lokacijo A
+        \end{itemize}
+      \item Izpis
+        \begin{itemize}
+          \item prenese podatke iz glavnega pomnilika(iz lokacije A) v svoj glavni pomnilnik
+          \item prenese podatke iz svojega lokalnega pomnilnika na naslov B na disku
+        \end{itemize}
+    \end{itemize}
+  \item Krmilnik pošlje prekinitveno zahtevo
+\end{enumerate}
+
+\section{Pomnilnik}
+
+//TODO slikca. Komentar: von Naumannova arhitektura\\*
+
+Pomnilniška hierarhija
+\begin{itemize}
+  \item pojavi se iz praktičnih razlogov
+  \item posledica: pojavijo se pretnje(nevarnosti)
+\end{itemize}
+
+//TODO slikca. Komentar: Izvaja se proces P, ki poveča podatek A na disku(iz 
+vrednosti 4 v 5). Najprej se po hierarhiji navzgor prenese podatek A(vrednost 4)
+v CPE, kjer  se podatek A poveča za 1(na vrednost 5). Spremenjena vrednost 
+podatka A se bo prenesla po hierarhiji navzdol, vendar ni nujno, da do konca(do
+diska). Če je P edini proces, ni videti nevatnosti, vendar naš OS je
+multiprogramski. Proces P je bil tako prekinjen s strani procesa Q in podatek A
+se je prenesel na sklad. Če proces Q hoče povečati vrednost podatka A, bo
+prebral vrednost 4 iz diska, saj proces Q ne upošteva ažuriranega stanja, ki ga
+je prinesla hierarhija.\\*
+
+Sodobni OS so \underline{večopravilni}, živih je lahko več procesov naekrat. OS
+more skrbeti za ažuriranje podatkov vzdolž hierarhije, sicer lahko pride do
+neskladnja med njimi.\\*
+
+Sklep
+\begin{itemize}
+  \item OS postane "žrtev" raznih zahtev
+  \item zahteva po izkoriščenosti in interaktivnosti vodi do 
+      \underline{večopravilnosti}
+  \item praktične zahteve vodijo do \underline{pomnilniške hierarhije}
+  \item večopravilnost + pomnilniška hierarhija porajata določene pretnje, ki
+        bi jih moral reševati OS. To je: OS more nuditi nekakšno
+        \underline{zaščito}
+  \item Zaščita je širši pojem, zajema več vrst pretenj, OS pri tem nujno
+      potrebuje določeno strojno opremo
+\end{itemize}
+
+\section{Zaščita}
+OS mora ščititi vsak proces pred drugimi procesi\\*
+
+Pri tem se mora OS opirati na nekaj osnovnih mehanizmov, ki jih nudi strojna
+oprema:
+\begin{itemize}
+  \item vsaj \underline{dvojni način} delovanja računalniškega sistema
+  \item \underline{priviligirani ukazi}
+  \item strojna zaščita glavnega pomnilnika
+  \item \underline{časovnik}(timer)
+  \item zaščita V/I
+\end{itemize}
+
+\subsection{Načini delovanja}
+
+\underline{Ideja:} Nekateri ukazi so potencialno škodljivi, zato naj bodo
+priviligirani. Ukaz, ki je priviligiran, bo smel neposredno izvesti le OS
+(uporabniški program pa ne)\\*
+
+\underline{Izvedba}
+\begin{enumerate}
+  \item Definiramo vsaj \underline{dva načina} delovanja računalniškega sistema
+      (mode operation):
+    \begin{itemize}
+      \item sistemski - v tem načinu teče le OS, ki lahko izvaja priviligirane
+          ukaze(system, supervisor, monitor)
+      \item uporabniški - v tem načinu tečejo uporabniški procesi(user mode)
+    \end{itemize}
+  \item Uvedemo strojno opremo: bit-Način(mode bit), ki pove v katerem načinu je
+      računalniški sistem.
+  \item Poskrbeti je treba, da bo v vsakem trenutku veljalo: bit-Način = 
+      uporabniški <==> teče uporabniški proces.
+  \item Kako?
+    \begin{description}
+      \item[A] Ob zagonu računalniškega sistema na bo bit-Način = sistemski. 
+      \item[B] OS naj zažene uporabniški program v bit-Način = uporabniški.
+      \item[C] Če med izvajanjem programa pride do prekinitvene zahteve, se mora
+           preklopiti v bit-Način = sistemski, pred zagonom PSP. Pred vrnitvijo
+           iz PSP v prekinjeni program se vrne na bit-Način = uporabniški.
+    \end{description}
+  \item Če bo uporabniški proces skušal izvesti nek \underline{priviligiran}
+      ukaz(pri tem bo bit-Način = uporabniški), se bo njegov ukaz ujel v past.
+\end{enumerate}
+
+\subsection{Žaščita glavnega pomnilnika}
+
+Primer: uporabniški program P lahko poljubno spreminja prekinitveni vektor
+\begin{itemize}
+  \item lahko povozi naslov PSPi-ja
+  \item lahko "popatcha" PSPi
+\end{itemize}
+
+//TODO slikca.\\*
+
+\subsection{Zaščita CPE}
+Program se lahko ujame v neskončno zanko.\\*
+\textcircled{?} Kako pred takim programom rešiti CPE?\\*
+Ideja: uvedemo \underline{časovnik}(timer). HW: ura + števec S -> ukaz za
+nastavitev števca je nujno \underline{priviligiran}\\*
+
+\subsubsection{OS(time sharing)}
+ponavljaj
+\begin{itemize}
+  \item OS naj izbere naslednji proces P, ki naj dobi procesor.
+  \item opravi vzdrževalna dela(house keeping):
+    \begin{itemize}
+      \item določi vrednost števca S(t.j. velikost časovne rezine)
+      \item nastavi števec := S
+      \item ...
+    \end{itemize}
+  \item predaj nadzor(CPE) procesu P
+  \item P teče... med tem se števeč zmanjšuje in ko števec postane = 0, sledi 
+        zahteva po prekinitvi
+\end{itemize}
+dokler P se je ustavil(končal/blokiral) ali iztekla se je časovna rezina\\*
+
+Nadzor prevzame OS, ki opravi še kakšno vzdrževalno delo.\\*
 \end{document}
